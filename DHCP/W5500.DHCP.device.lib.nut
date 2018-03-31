@@ -24,6 +24,7 @@
 
 // DHCP SETTINGS
 const W5500_DHCP_DEST_IP = "255.255.255.255"
+const W5500_DHCP_SRC_IP = "0.0.0.0"
 const W5500_DHCP_DEST_PORT = 67
 const W5500_DHCP_SRC_PORT = 68
 
@@ -51,7 +52,7 @@ const W5500_DHCP_HLENETHERNET = 06; // /< Used in hlen of @ref RIP_MSG
 const W5500_DHCP_HOPS = 00; // /< Used in hops of @ref RIP_MSG
 const W5500_DHCP_SECS = 00; // /< Used in secs of @ref RIP_MSG
 
-const W5500_DHCP_OPT_SIZE = 212;
+const W5500_DHCP_OPT_SIZE = 312;
 
 // DHCP State Machine
 const W5500_DHCP_STATE_DISCONNECTED = 0x00;
@@ -314,6 +315,9 @@ class W5500.DHCP {
         if (_renewTimer) imp.cancelwakeup(_renewTimer);
         _renewTimer = null;
 
+        // Clear source IP
+        _driver.setSourceIP(W5500_SRC_DEST_IP);
+        
         // Setup the network for DHCP (UDP)
         _driver.openConnection(W5500_DHCP_DEST_IP, W5500_DHCP_DEST_PORT, W5500_SOCKET_MODE_UDP, W5500_DHCP_SRC_PORT, function(err, connection) {
 
@@ -761,10 +765,6 @@ class W5500.DHCP {
         options.writen(0x01, 'b');
         // Writes Mac Address
         options.writeblob(mac);
-
-        // Host Name
-        options.writen(W5500_DHCP_OPTIONS.hostName, 'b');
-        options.writestring("\x03\x4F\x0D\xEB");
 
         // ParamRequest
         options.writen(W5500_DHCP_OPTIONS.dhcpParamRequest, 'b');
